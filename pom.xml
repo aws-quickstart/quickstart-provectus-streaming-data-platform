@@ -1,0 +1,356 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.provectus.fds</groupId>
+    <artifactId>fds-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <lombok.version>1.18.4</lombok.version>
+
+        <aws.lambda.version>1.2.0</aws.lambda.version>
+        <aws.lambda.events.version>2.2.4</aws.lambda.events.version>
+        <aws.java.sdk.version>1.11.253</aws.java.sdk.version>
+        <aws.kinesisanalytics.version>1.0.1</aws.kinesisanalytics.version>
+        <amazon.kinesis.producer.version>0.12.11</amazon.kinesis.producer.version>
+        <async.http.client.version>2.6.0</async.http.client.version>
+        <com.fasterxml.jackson.version>2.9.8</com.fasterxml.jackson.version>
+        <org.apache.parquet.version>1.10.0</org.apache.parquet.version>
+        <flink.version>1.6.3</flink.version>
+        <hadoop.version>2.7.3</hadoop.version>
+        <io.airlift.version>0.36</io.airlift.version>
+
+        <!-- Logging -->
+        <aws-lambda-java-log4j2.version>1.0.0</aws-lambda-java-log4j2.version>
+        <aws.lambda.log4j.version>1.0.0</aws.lambda.log4j.version>
+        <aws.lambda.log4j2.version>1.1.0</aws.lambda.log4j2.version>
+        <log4j.version>2.11.2</log4j.version>
+        <slf4j.version>1.7.26</slf4j.version>
+        <lz4.version>1.5.1</lz4.version>
+
+        <!-- Tests  -->
+        <junit.version>4.12</junit.version>
+        <hamcrest.version>2.1</hamcrest.version>
+        <awaitility.version>3.1.5</awaitility.version>
+        <flinkspector.version>0.9.2</flinkspector.version>
+
+        <!-- Plugins -->
+        <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
+        <maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>release</id>
+            <name>libs-release</name>
+            <url>http://artifactory.provectus.com/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <snapshots/>
+            <id>snapshot</id>
+            <name>libs-snapshot</name>
+            <url>http://artifactory.provectus.com/artifactory/libs-snapshot</url>
+        </repository>
+        <repository>
+            <id>palantir</id>
+            <name>palantir</name>
+            <url>https://dl.bintray.com/palantir/releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-core</artifactId>
+                <version>${aws.lambda.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-events</artifactId>
+                <version>${aws.lambda.events.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-kinesis</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-glue</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-kinesisanalytics-runtime</artifactId>
+                <version>${aws.kinesisanalytics.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-athena</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-sagemaker</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-sagemakerruntime</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-models</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-common-dynamodb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-lambda-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-lambda-compaction</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-lambda-dynamodb-persister</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.provectus.fds</groupId>
+                <artifactId>fds-lambda-reports</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-dynamodb</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>amazon-kinesis-producer</artifactId>
+                <version>${amazon.kinesis.producer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-common</artifactId>
+                <version>${org.apache.parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-encoding</artifactId>
+                <version>${org.apache.parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-column</artifactId>
+                <version>${org.apache.parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-hadoop</artifactId>
+                <version>${org.apache.parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.parquet</groupId>
+                <artifactId>parquet-avro</artifactId>
+                <version>${org.apache.parquet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-client</artifactId>
+                <version>${hadoop.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-cloudformation</artifactId>
+                <version>${aws.java.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.asynchttpclient</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>${async.http.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.airlift</groupId>
+                <artifactId>slice</artifactId>
+                <version>${io.airlift.version}</version>
+            </dependency>
+
+            <!-- Logging -->
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>${lz4.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-log4j2</artifactId>
+                <version>${aws.lambda.log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-log4j</artifactId>
+                <version>${aws.lambda.log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Tests -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest</artifactId>
+                <version>${hamcrest.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.flinkspector</groupId>
+                <artifactId>flinkspector-datastream_2.11</artifactId>
+                <version>${flinkspector.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven.shade.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>fds-it</module>
+        <module>fds-lambda-api</module>
+        <module>fds-lambda-reports</module>
+        <module>fds-lambda-compaction</module>
+        <module>fds-models</module>
+        <module>fds-lambda-utils</module>
+        <module>fds-lambda-dynamodb-persister</module>
+        <module>fds-common-dynamodb</module>
+        <module>fds-flink-streaming</module>
+        <module>fds-lambda-ml-integration</module>
+        <module>fds-lambda-locations-ingestion</module>
+    </modules>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M3</version>
+            </plugin>
+        </plugins>
+    </reporting>
+</project>
