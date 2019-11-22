@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Streaming Data Platform, fast and safe way for data streaming
+Metadata:
+  Authors:
+    Description: German Osin (gosin@provectus.com), Rustam Gimadiev (rgimadiev@provectus.com), Andrew Saushkin (asaushkin@provectus.com), Astamur Kirillin (akirillin@provectus.com)
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - BufInterval
+          - BufSize
+          - AggregationPeriod
+          - BidsSessionTimeout
+          - ShardCount
+          - ClicksSessionTimeout
+          - LocationsSessionTimeout
+          - LogLevel
+          - ServicePrefix
+    ParameterLabels:
+      - BufInterval:
+          default: Buffering interval
+      - BufSize:
+          default: Buffering size
+      - ShardCount:
+          default: Number of Kinesis streams shards
+      - AggregationPeriod:
+          default: Period of triggering aggreation function
+      - BidsSessionTimeout:
+          default: Session length (in minutes) for joing bids with impressions
+      - ClicksSessionTimeout:
+          default: Session length (in minutes) for joing impressions with clicks
+      - LocationsSessionTimeout:
+          default: Session length (in minutes) for joing locations with clicks and impressions
+      - LogLevel:
+          default: Default log level in lamdas
+      - ServicePrefix:
+          default: Prefix for the stack resources
+Parameters:
+  BufInterval:
+    Default: 60
+    Type: Number
+  BufSize:
+    Default: 50
+    Type: Number
+  ShardCount:
+    Default: 2
+    Type: Number
+  AggregationPeriod:
+    Default: 10
+    Type: Number
+  BidsSessionTimeout:
+    Default: 5
+    Type: Number
+  ClicksSessionTimeout:
+    Default: 5
+    Type: Number
+  LocationsSessionTimeout:
+    Default: 10
+    Type: Number
+  LogLevel:
+    Default: debug
+    Type: String
+  ServicePrefix:
+    Type: String
+Rules:
+  RegionSupport:
+    Assertions:
+      - Assert:
+          Fn::Contains:
+            - - 'us-east-1'
+              - 'us-east-2'
+              - 'us-west-2'
+              - 'eu-west-1'
+              - 'eu-central-1'
+            - !Ref 'AWS::Region'
+        AssertDescription: This stack is only available in the US East (N. Virginia, Ohio), US West (Oregon), EU (Ireland and Frankfurt) regions. Please launch the stack in one of these regions to continue.
+Resources:
+  common:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './common.yaml'
+      Parameters:
+        ServicePrefix: !Ref ServicePrefix
+        AnalyticalDBName: !Sub '${ServicePrefix}-db'
+        S3BucketName: !Sub 'sdp-${ServicePrefix}-bucket'
+        LocationStreamName: !Sub '${ServicePrefix}-locations'
+  ml:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './ml.yaml'
+      Parameters:
+        ServicePrefix: !Ref ServicePrefix
+        S3BucketName:  !Sub 'sdp-${ServicePrefix}-bucket'
+        AnalyticalDBName: !Sub '${ServicePrefix}-db'
+        JsonToParquetLambdaArn: !GetAtt common.Outputs.JsonToParquetLambdaArn
+        LocationsIngestionLambdaArn: !GetAtt common.Outputs.LocationsIngestionLambdaArn
+        LogLevel: !Ref LogLevel
+        ShardCount: !Ref ShardCount
+  processing:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './processing.yaml'
+      Parameters:
+        ServicePrefix: !Ref ServicePrefix
+        AnalyticalDBName: !Sub '${ServicePrefix}-db'
+        LocationStreamName: !Sub '${ServicePrefix}-locations'
+        S3BucketName: !GetAtt ml.Outputs.S3BucketName
+        BufInterval: !Ref BufInterval
+        BufSize: !Ref BufSize
+        ShardCount: !Ref ShardCount
+        AggregationPeriod: !Ref AggregationPeriod
+        BidsSessionTimeout: !Ref BidsSessionTimeout
+        ClicksSessionTimeout: !Ref ClicksSessionTimeout
+        LocationsSessionTimeout: !Ref LocationsSessionTimeout
+  injection:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './injection.yaml'
+      Parameters:
+          ServicePrefix: !Ref ServicePrefix
+          BcnStreamName: !Sub '${ServicePrefix}-bcns'
+          LocationStreamName: !Sub '${ServicePrefix}-locations'
+  reporting:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './reporting.yaml'
+      Parameters:
+        ServicePrefix: !Ref ServicePrefix
+        AggregationDynamoTableName: !GetAtt processing.Outputs.AggregationDynamoTableName
+Outputs:
+  UrlForAPI:
+    Description: Root URL of the API gateway
+    Value: !GetAtt injection.Outputs.UrlForAPI
+  UrlForReports:
+    Description: Root URL of the reports gateway
+    Value: !GetAtt reporting.Outputs.UrlForReports
+  UrlForPredictions:
+    Description: Prediction URL of the API gateway
+    Value: !GetAtt ml.Outputs.UrlForPredictions
+  Bucket:
+    Description: S3 bucket with data
+    Value: !GetAtt ml.Outputs.S3BucketName
