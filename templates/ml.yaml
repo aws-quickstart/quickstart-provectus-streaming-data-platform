@@ -26,6 +26,11 @@ Parameters:
     Type: String
   AnalyticalDBName:
     Type: String
+  AppVersion:
+    AllowedPattern: '^v[0-9].[0-9].[0-9]$'
+    ConstraintDescription: Application version
+    Default: v1.1.0
+    Type: String
 
 Mappings:
   Algorithm:
@@ -93,7 +98,9 @@ Resources:
     Properties:
       FunctionName: !Sub '${ServicePrefix}S3EventProxy'
       Handler: com.provectus.fds.ml.LambdaS3EventProxy
-      CodeUri: ../functions/fds-lambda-ml-integration/target/fds-lambda-ml-integration-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-ml-integration-1.0-SNAPSHOT.jar"
       Runtime: java8
       Role: !GetAtt S3ProxyExecutionRole.Arn
       MemorySize: 256
@@ -307,8 +314,8 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:s3:::${S3BucketName}'
                   - !Sub 'arn:aws:s3:::${S3BucketName}/*'
-                  - !Sub 'arn:aws:s3:::@S3ResourceBucket@'
-                  - !Sub 'arn:aws:s3:::@S3ResourceBucket@/*'
+                  - !Sub 'arn:aws:s3:::streaming-data-platform-releases-${AWS::Region}'
+                  - !Sub 'arn:aws:s3:::streaming-data-platform-releases-${AWS::Region}/*'
 
   ApiGateway:
     Type: "AWS::ApiGateway::RestApi"
@@ -341,7 +348,9 @@ Resources:
     Properties:
       FunctionName: !Sub "${ServicePrefix}InvokeEndpointLambda"
       Handler: com.provectus.fds.ml.InvokeEndpointLambda
-      CodeUri: ../functions/fds-lambda-ml-integration/target/fds-lambda-ml-integration-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-ml-integration-1.0-SNAPSHOT.jar"
       Runtime: java8
       MemorySize: 256
       Timeout: 30
@@ -375,7 +384,9 @@ Resources:
     Type: AWS::Serverless::Function
     DependsOn: LambdaExecutionRole
     Properties:
-      CodeUri: ../functions/fds-lambda-ml-integration/target/fds-lambda-ml-integration-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-ml-integration-1.0-SNAPSHOT.jar"
       FunctionName:
         !Sub '${ServicePrefix}MlIntegration'
       Environment:
@@ -415,7 +426,9 @@ Resources:
     Type: AWS::Serverless::Function
     DependsOn: LambdaExecutionRole
     Properties:
-      CodeUri: ../functionsfds-lambda-ml-integration/target/fds-lambda-ml-integration-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-ml-integration-1.0-SNAPSHOT.jar"
       FunctionName:
         !Sub '${ServicePrefix}MlEndpointReplacer'
       Environment:
@@ -466,7 +479,7 @@ Resources:
     Properties:
       ExecutionRoleArn: !GetAtt 'SageMakerRole.Arn'
       PrimaryContainer:
-        ModelDataUrl: !Sub 's3://@S3ResourceBucket@/@PlatformVersion@/model.tar.gz'
+        ModelDataUrl: !Sub 's3://streaming-data-platform-releases-${AWS::Region}/${AppVersion}/model.tar.gz'
         Image:
           !Join
             - ''
