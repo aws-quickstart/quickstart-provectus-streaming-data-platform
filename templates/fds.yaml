@@ -1,0 +1,230 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Streaming Data Platform, fast and safe way for data streaming
+Metadata:
+  Authors:
+    Description: German Osin (gosin@provectus.com), Rustam Gimadiev (rgimadiev@provectus.com),
+      Andrew Saushkin (asaushkin@provectus.com), Astamur Kirillin (akirillin@provectus.com)
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: AWS Quick Start Configuration
+      Parameters:
+        - ServicePrefix
+        - QSS3BucketName
+        - QSS3KeyPrefix
+    - Label:
+        default: General Configuration
+      Parameters:
+      - BufInterval
+      - BufSize
+      - AggregationPeriod
+      - BidsSessionTimeout
+      - ShardCount
+      - ClicksSessionTimeout
+      - LocationsSessionTimeout
+      - LogLevel
+    ParameterLabels:
+    - BufInterval:
+        default: Buffering interval
+    - BufSize:
+        default: Buffering size
+    - ShardCount:
+        default: Number of Kinesis streams shards
+    - AggregationPeriod:
+        default: Period of triggering aggreation function
+    - BidsSessionTimeout:
+        default: Session length (in minutes) for joing bids with impressions
+    - ClicksSessionTimeout:
+        default: Session length (in minutes) for joing impressions with clicks
+    - LocationsSessionTimeout:
+        default: Session length (in minutes) for joing locations with clicks and impressions
+    - LogLevel:
+        default: Default log level in lamdas
+    -  ServicePrefix:
+        default: Prefix for the stack resources
+    -  QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+    -  QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
+
+Parameters:
+  BufInterval:
+    Default: 60
+    Type: Number
+  BufSize:
+    Default: 50
+    Type: Number
+  ShardCount:
+    Default: 2
+    Type: Number
+  AggregationPeriod:
+    Default: 10
+    Type: Number
+  BidsSessionTimeout:
+    Default: 5
+    Type: Number
+  ClicksSessionTimeout:
+    Default: 5
+    Type: Number
+  LocationsSessionTimeout:
+    Default: 10
+    Type: Number
+  LogLevel:
+    Default: debug
+    Type: String
+  ServicePrefix:
+    Type: String
+  QSS3BucketName:
+    Default: 'aws-quickstart'
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    Default: 'quickstart-streaming-data-platform/'
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+
+Rules:
+  RegionSupport:
+    Assertions:
+    - Assert:
+        Fn::Contains:
+        - - us-east-1
+          - us-east-2
+          - us-west-2
+          - eu-west-1
+          - eu-central-1
+        - Ref: AWS::Region
+      AssertDescription: This stack is only available in the US East (N. Virginia,
+        Ohio), US West (Oregon), EU (Ireland and Frankfurt) regions. Please launch
+        the stack in one of these regions to continue.
+
+Resources:
+  common:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/common.yaml'
+      Parameters:
+        ServicePrefix:
+          Ref: ServicePrefix
+        AnalyticalDBName:
+          Fn::Sub: ${ServicePrefix}-db
+        S3BucketName:
+          Fn::Sub: sdp-${ServicePrefix}-bucket
+        LocationStreamName:
+          Fn::Sub: ${ServicePrefix}-locations
+
+  ml:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/ml.yaml'
+      Parameters:
+        ServicePrefix:
+          Ref: ServicePrefix
+        S3BucketName:
+          Fn::Sub: sdp-${ServicePrefix}-bucket
+        AnalyticalDBName:
+          Fn::Sub: ${ServicePrefix}-db
+        JsonToParquetLambdaArn:
+          Fn::GetAtt:
+          - common
+          - Outputs.JsonToParquetLambdaArn
+        LocationsIngestionLambdaArn:
+          Fn::GetAtt:
+          - common
+          - Outputs.LocationsIngestionLambdaArn
+        LogLevel:
+          Ref: LogLevel
+        ShardCount:
+          Ref: ShardCount
+
+  processing:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/processing.yaml'
+      Parameters:
+        ServicePrefix:
+          Ref: ServicePrefix
+        AnalyticalDBName:
+          Fn::Sub: ${ServicePrefix}-db
+        LocationStreamName:
+          Fn::Sub: ${ServicePrefix}-locations
+        S3BucketName:
+          Fn::GetAtt:
+          - ml
+          - Outputs.S3BucketName
+        BufInterval:
+          Ref: BufInterval
+        BufSize:
+          Ref: BufSize
+        ShardCount:
+          Ref: ShardCount
+        AggregationPeriod:
+          Ref: AggregationPeriod
+        BidsSessionTimeout:
+          Ref: BidsSessionTimeout
+        ClicksSessionTimeout:
+          Ref: ClicksSessionTimeout
+        LocationsSessionTimeout:
+          Ref: LocationsSessionTimeout
+
+  injection:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/injection.yaml'
+      Parameters:
+        ServicePrefix:
+          Ref: ServicePrefix
+        BcnStreamName:
+          Fn::Sub: ${ServicePrefix}-bcns
+        LocationStreamName:
+          Fn::Sub: ${ServicePrefix}-locations
+
+  reporting:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/reporting.yaml'
+      Parameters:
+        ServicePrefix:
+          Ref: ServicePrefix
+        AggregationDynamoTableName:
+          Fn::GetAtt:
+          - processing
+          - Outputs.AggregationDynamoTableName
+
+Outputs:
+  UrlForAPI:
+    Description: Root URL of the API gateway
+    Value:
+      Fn::GetAtt:
+      - injection
+      - Outputs.UrlForAPI
+  UrlForReports:
+    Description: Root URL of the reports gateway
+    Value:
+      Fn::GetAtt:
+      - reporting
+      - Outputs.UrlForReports
+  UrlForPredictions:
+    Description: Prediction URL of the API gateway
+    Value:
+      Fn::GetAtt:
+      - ml
+      - Outputs.UrlForPredictions
+  Bucket:
+    Description: S3 bucket with data
+    Value:
+      Fn::GetAtt:
+      - ml
+      - Outputs.S3BucketName

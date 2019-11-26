@@ -40,6 +40,12 @@ Parameters:
     Type: Number
   LocationsSessionTimeout:
     Type: Number
+  AppVersion:
+    AllowedPattern: '^v[0-9].[0-9].[0-9]$'
+    ConstraintDescription: Application version
+    Default: v1.1.0
+    Type: String
+
 Resources:
   # Kinesis delivery stream for all raw events
   BcnStream:
@@ -143,7 +149,7 @@ Resources:
                   - s3:GetObjectVersion
                 Resource:
                   - !Sub 'arn:aws:s3:::${S3BucketName}/*'
-                  - !Sub 'arn:aws:s3:::@S3ResourceBucket@/@PlatformVersion@/fds-flink-streaming.jar'
+                  - !Sub 'arn:aws:s3:::streaming-data-platform-releases-${AWS::Region}/${AppVersion}/fds-flink-streaming.jar'
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -199,7 +205,9 @@ Resources:
   AppStarterLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./fds-lambda-utils/target/fds-lambda-utils-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-utils-1.0-SNAPSHOT.jar"
       FunctionName: !Sub '${ServicePrefix}AppStarter'
       Handler: com.provectus.fds.utils.ApplicationStartLambda
       MemorySize: 256
@@ -224,8 +232,8 @@ Resources:
           CodeContentType: ZIPFILE
           CodeContent:
             S3ContentLocation:
-              BucketARN: !Sub 'arn:aws:s3:::@S3ResourceBucket@'
-              FileKey: '@PlatformVersion@/fds-flink-streaming.jar'
+              BucketARN: !Sub 'arn:aws:s3:::streaming-data-platform-releases-${AWS::Region}'
+              FileKey: !Sub '${AppVersion}/fds-flink-streaming.jar'
         EnvironmentProperties:
           PropertyGroups:
             - PropertyGroupId: SourceConfigProperties
@@ -288,7 +296,9 @@ Resources:
   JsonNewLineAdderLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./fds-lambda-compaction/target/fds-lambda-compaction-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-compaction-1.0-SNAPSHOT.jar"
       FunctionName: !Sub '${ServicePrefix}JsonNewLineAdder'
       Handler: com.provectus.fds.compaction.JsonNewLineAdderLambda
       MemorySize: 128
@@ -875,7 +885,9 @@ Resources:
   KinesisToDynamoDbLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./fds-lambda-dynamodb-persister/target/fds-lambda-dynamodb-persister-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-dynamodb-persister-1.0-SNAPSHOT.jar"
       FunctionName: !Sub '${ServicePrefix}KinesisToDynamoDbPersister'
       Environment:
         Variables:

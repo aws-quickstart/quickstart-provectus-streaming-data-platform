@@ -4,26 +4,37 @@ Description: Processing part of Streaming Data Platform solution
 Metadata:
   Authors:
     Description: German Osin (gosin@provectus.com), Rustam Gimadiev (rgimadiev@provectus.com), Andrew Saushkin (asaushkin@provectus.com), Astamur Kirillin (akirillin@provectus.com)
+
 Parameters:
   AnalyticalDBName:
     AllowedPattern: '^[-a-zA-Z0-9]{4,61}$'
     Default: fdsdb
     Type: String
+
   ServicePrefix:
     AllowedPattern: '^[-a-zA-Z0-9]{4,61}$'
     ConstraintDescription: Prefix should be DNS compliant
     Default: testing
     Type: String
+
+  AppVersion:
+    AllowedPattern: '^v[0-9].[0-9].[0-9]$'
+    ConstraintDescription: Application version
+    Default: v1.1.0
+    Type: String
+
   S3BucketName:
     AllowedPattern: '^[-a-zA-Z0-9]{4,61}$'
     ConstraintDescription: Bucket name must not contain uppercase characters or underscores
     Default: fdsbucket
     Type: String
+
   LocationStreamName:
     AllowedPattern: '^[-a-zA-Z0-9_]{4,61}$'
     ConstraintDescription: Should be a valid Kinesis topic name
     Default: locations
     Type: String
+
 Resources:
   LogGroupJsonToParquetLambda:
     Type: AWS::Logs::LogGroup
@@ -92,7 +103,9 @@ Resources:
   JsonToParquetLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./fds-lambda-compaction/target/fds-lambda-compaction-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-compaction-1.0-SNAPSHOT.jar"
       FunctionName: !Sub '${ServicePrefix}JsonToParquetConverter'
       Environment:
         Variables:
@@ -146,7 +159,9 @@ Resources:
     Properties:
       FunctionName: !Sub '${ServicePrefix}LocationsHandler'
       Role: !GetAtt 'LocationsIngestionLambdaRole.Arn'
-      CodeUri: ./fds-lambda-locations-ingestion/target/fds-lambda-locations-ingestion-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-locations-ingestion-1.0-SNAPSHOT.jar"
       Handler: com.provectus.fds.ingestion.LocationsHandler
       Runtime: java8
       MemorySize: 256

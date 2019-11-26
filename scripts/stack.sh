@@ -116,22 +116,22 @@ preprocess processing
 echo Packaging fds-template.yaml to fds.yaml with bucket ${resourceBucket}
 
 ${AWS_CLI} cloudformation package  \
-    --template-file ${PROJECT_DIR}/fds-template.yaml \
+    --template-file ${PROJECT_DIR}/templates/fds-template.yaml \
     --s3-bucket ${resourceBucket} \
     --s3-prefix ${platformVersion} \
-    --output-template-file ${PROJECT_DIR}/fds.yaml
+    --output-template-file ${PROJECT_DIR}/templates/fds.yaml
 
 echo "Copying fds.yaml to s3://${resourceBucket}/${platformVersion}/fds.template"
-${AWS_CLI} s3 cp ${PROJECT_DIR}/fds.yaml \
-    s3://${resourceBucket}/${platformVersion}/fds.template
+${AWS_CLI} s3 cp ${PROJECT_DIR}/templates/fds.yaml \
+    s3://${resourceBucket}/${platformVersion}/templates/fds.template
 
 if [[ ! -z "${copyResources}" ]]; then
     echo "Copying model.tar.gz to s3://${resourceBucket}/${platformVersion}/model.tar.gz"
-    ${AWS_CLI} s3 cp ${PROJECT_DIR}/fds-lambda-ml-integration/src/main/resources/model.tar.gz \
+    ${AWS_CLI} s3 cp ${PROJECT_DIR}/functions/fds-lambda-ml-integration/src/main/resources/model.tar.gz \
         s3://${resourceBucket}/${platformVersion}/model.tar.gz
 
     echo "Copying fds-flink-streaming-1.0-SNAPSHOT.jar to s3://${resourceBucket}/${platformVersion}/fds-flink-streaming.jar"
-    ${AWS_CLI} s3 cp ${PROJECT_DIR}/fds-flink-streaming/target/fds-flink-streaming-1.0-SNAPSHOT.jar \
+    ${AWS_CLI} s3 cp ${PROJECT_DIR}/functions/fds-flink-streaming/target/fds-flink-streaming-1.0-SNAPSHOT.jar \
         s3://${resourceBucket}/${platformVersion}/fds-flink-streaming.jar
 fi
 
