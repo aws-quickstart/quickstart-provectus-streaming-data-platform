@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey":"QSS3BucketName",
+    "ParameterValue":"$[taskcat_autobucket]"
+  },
+  {
+    "ParameterKey": "QSS3KeyPrefix",
+    "ParameterValue": "quickstart-streaming-data-platform/"
+  },
+  {
+    "ParameterKey": "ServicePrefix",
+    "ParameterValue": "$[taskcat_random-string]"
+  }
+]

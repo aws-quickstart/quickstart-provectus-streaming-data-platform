@@ -12,6 +12,11 @@ Parameters:
     Type: String
   AggregationDynamoTableName:
     Type: String
+  AppVersion:
+    AllowedPattern: '^v[0-9].[0-9].[0-9]$'
+    ConstraintDescription: Application version
+    Default: v1.1.0
+    Type: String
 Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -189,7 +194,9 @@ Resources:
   ReportingLambda:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ../functions/fds-lambda-reports/target/fds-lambda-reports-1.0-SNAPSHOT.jar
+      CodeUri:
+        Bucket: !Sub 'streaming-data-platform-releases-${AWS::Region}'
+        Key: !Sub "${AppVersion}/fds-lambda-reports-1.0-SNAPSHOT.jar"
       FunctionName: !Sub '${ServicePrefix}ReportsHandler'
       Environment:
         Variables:
