@@ -52,29 +52,38 @@ Parameters:
   BufInterval:
     Default: 60
     Type: Number
+    Description: Buffering interval
   BufSize:
     Default: 50
     Type: Number
+    Description: Buffering size
   ShardCount:
     Default: 2
     Type: Number
+    Description: Number of Kinesis streams shards
   AggregationPeriod:
     Default: 10
     Type: Number
+    Description: Period of triggering aggreation function
   BidsSessionTimeout:
     Default: 5
     Type: Number
+    Description: Session length (in minutes) for joing bids with impressions
   ClicksSessionTimeout:
     Default: 5
     Type: Number
+    Description: Session length (in minutes) for joing impressions with clicks
   LocationsSessionTimeout:
     Default: 10
     Type: Number
+    Description: Session length (in minutes) for joing locations with clicks and impressions
   LogLevel:
     Default: debug
     Type: String
+    Description: Default log level in lamdas
   ServicePrefix:
     Type: String
+    Description: Prefix for the stack resources
   QSS3BucketName:
     Default: 'aws-quickstart'
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
