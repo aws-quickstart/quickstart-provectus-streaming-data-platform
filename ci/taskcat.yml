@@ -1,12 +1,12 @@
 global:
   marketplace-ami: false
   owner: quickstart-eng@amazon.com
-  qsname: quickstart-streaming-data-platform
+  qsname: quickstart-provectus-streaming-data-platform
   regions:
-#    - eu-central-1
+    - eu-central-1
     - eu-west-1
     - us-east-1
-#    - us-west-1
+    - us-west-1
     - us-west-2
   reporting: true
 
@@ -15,8 +15,6 @@ tests:
     parameter_input: fds-inputs.json
     template_file: fds.yaml
     regions:
-#      - eu-central-1
       - eu-west-1
       - us-east-1
-#      - us-west-1
       - us-west-2
