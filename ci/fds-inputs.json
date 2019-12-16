@@ -5,7 +5,7 @@
   },
   {
     "ParameterKey": "QSS3KeyPrefix",
-    "ParameterValue": "quickstart-streaming-data-platform/"
+    "ParameterValue": "quickstart-provectus-streaming-data-platform/"
   },
   {
     "ParameterKey": "ServicePrefix",

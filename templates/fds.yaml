@@ -95,7 +95,7 @@ Parameters:
       It cannot start or end with a hyphen (-).
     Type: String
   QSS3KeyPrefix:
-    Default: 'quickstart-streaming-data-platform/'
+    Default: 'quickstart-provectus-streaming-data-platform/'
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), and forward slash (/).
