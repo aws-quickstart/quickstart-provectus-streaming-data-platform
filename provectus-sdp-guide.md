@@ -1,4 +1,4 @@
-# AWS Native Streaming Data Platform
+# AWS-Native Streaming Data Platform
 1. [Overview](#Overview)
     1. [Architecture](#architecture)
     1. [Region availability](#region-availability)
