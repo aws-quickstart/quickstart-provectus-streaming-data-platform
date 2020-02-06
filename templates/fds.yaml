@@ -27,30 +27,30 @@ Metadata:
           - LocationsSessionTimeout
           - LogLevel
     ParameterLabels:
-      - BufInterval:
-          default: Buffering interval
-      - BufSize:
-          default: Buffering size
-      - ShardCount:
-          default: Number of Kinesis streams shards
-      - AggregationPeriod:
-          default: Period of triggering aggreation function
-      - BidsSessionTimeout:
-          default: Session length (in minutes) for joing bids with impressions
-      - ClicksSessionTimeout:
-          default: Session length (in minutes) for joing impressions with clicks
-      - LocationsSessionTimeout:
-          default: >-
-            Session length (in minutes) for joing locations with clicks and
-            impressions
-      - LogLevel:
-          default: Default log level in lamdas
-      - ServicePrefix:
-          default: Prefix for the stack resources
-      - QSS3BucketName:
-          default: Quick Start S3 Bucket Name
-      - QSS3KeyPrefix:
-          default: Quick Start S3 Key Prefix
+      BufInterval:
+        default: Buffering interval
+      BufSize:
+        default: Buffering size
+      ShardCount:
+        default: Number of Kinesis streams shards
+      AggregationPeriod:
+        default: Period of triggering aggreation function
+      BidsSessionTimeout:
+        default: Session length (in minutes) for joing bids with impressions
+      ClicksSessionTimeout:
+        default: Session length (in minutes) for joing impressions with clicks
+      LocationsSessionTimeout:
+        default: >-
+          Session length (in minutes) for joing locations with clicks and
+          impressions
+      LogLevel:
+        default: Default log level in lamdas
+      ServicePrefix:
+        default: Prefix for the stack resources
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
 Parameters:
   BufInterval:
     Default: 60
