@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: 'AWS::Serverless-2016-10-31'
-Description: 'Streaming Data Platform, fast and safe way for data streaming'
+Description: 'Streaming Data Platform, fast and safe way for data streaming. (qs-1qh4db8n9)'
 Metadata:
   Authors:
     Description: >-
