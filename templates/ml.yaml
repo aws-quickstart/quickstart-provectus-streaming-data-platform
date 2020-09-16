@@ -65,6 +65,7 @@ Resources:
       FunctionName: !GetAtt S3EventProxy.Arn
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
+      SourceAccount: !Ref 'AWS::AccountId'
       SourceArn: !Sub 'arn:aws:s3:::${S3BucketName}'
   # Log group for S3EventProxy lambda
   LogGroupS3EventProxy:
